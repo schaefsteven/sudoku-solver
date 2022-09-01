@@ -88,6 +88,14 @@ class Board():
             values = list(itertools.chain.from_iterable(values))
         return values
     
+    def solve(self):
+        """Solves the puzzle"""
+        change_made = True
+        while change_made:
+            change_made = False
+            for cell in self.all_cells:
+                change_made = cell.unique(self) or change_made
+        return
 
 class Cell():
     """Contains info about each cell"""
@@ -100,6 +108,44 @@ class Cell():
         self.row = row
         # Column that the cell is in
         self.column = column
+
+    def unique(self, board):
+        """First calls self.eliminate because this technique requires that
+        the cell's possibilities list is up to date with known neighor values.
+        Then checks if there is a possibility that is unique in any of the 
+        cell's dimension. If so, set the value to that possibility and clear
+        the possibilities list. Returns True if any changes were made to the 
+        cell."""
+        change_made = self.eliminate(board)
+        for dimen in ("row", "col", "sq"):
+            neighbor_possibilities = board.get(dimen, self, "possibilities",
+                    exclude_self = True)
+            for poss in self.possibilities:
+                if poss not in neighbor_possibilities:
+                    self.value = poss
+                    self.possibilities = []
+                    change_made = True
+        return change_made
+
+    def eliminate(self, board):
+        """Removes values from self.possibilites if those values are known
+        in any dimension. Returns True if any changes were made to the cell."""
+        change_made = False
+        for dimen in ("row", "col", "sq"):
+            neighbor_values = board.get(dimen, self, "value")
+            for n_val in neighbor_values:
+                if n_val in self.possibilities:
+                    self.possibilities.remove(n_val)
+                    change_made = True
+                    self.check_if_solved()
+        return change_made
+
+    def check_if_solved(self):
+        """Checks if there's only one possibility left and if so, sets the 
+        value and possibilities of the cell accordingly"""
+        if len(self.possibilities) == 1: 
+            self.value = self.possibilities.pop()
+        return
 
     def __repr__(self):
         return f"Cell R:{self.row} C:{self.column}"
