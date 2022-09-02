@@ -1,7 +1,7 @@
-from sudoku import data
+from sudoku import sudoku
 
 def main():
-    board = data.Board("sample_boards/board0.csv")
+    board = sudoku.Board("sample_boards/board0.csv")
     board.print()
     board.solve()
     board.check()

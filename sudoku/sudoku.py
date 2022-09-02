@@ -13,7 +13,7 @@ class Board():
     def __init__(self, file = None):
         # Two-dimensional array of rows and columns. Indexed as
         # self.cells[row][column]
-        self.cells = [[Cell(row, column) for column in range(9)] 
+        self.cells = [[Cell(row, column, None) for column in range(9)] 
                 for row in range(9)]
 
         # Creates an easy way to iterate over all of the cells at once
@@ -24,10 +24,29 @@ class Board():
         self.rows = self.cells
         # Columns
         self.columns = [[row[col] for row in self.cells] 
-                for col in len(self.cells[0])]
+                for col in range(len(self.cells[0]))]
         # Squares
-        
-        self.squares 
+        self.squares = []
+        square_index = 0
+        # For each index_cell
+        for index_row in self.rows[::3]:
+            for index_cell in index_row[::3]:
+                # Find our starting row and column
+                start_row = (int(index_cell.row / 3) * 3)
+                start_col = (int(index_cell.column / 3) * 3)
+                # Grab the three rows that we want
+                rows = self.cells[start_row : start_row + 3]
+                # Build the cells array, must be one-dimensional
+                cells = []
+                for row in rows:
+                    for entry in row[start_col : start_col + 3]:
+                        cells.append(entry) 
+                # Set the square attribute for each square
+                for cell in cells:
+                    cell.square = square_index
+                square_index += 1
+                # Append the cells array (our new square) to the squares array
+                self.squares.append(cells)
 
         # Set values of cells to values from file if one is provided
         if file:
@@ -70,21 +89,13 @@ class Board():
         # Determine which cells are in the input cell's dimension
         # Row
         if dimension == "row":
-            cells = self.cells[cell.row]
+            cells = self.rows[cell.row]
         # Column
         elif dimension in ("column", "col"):
-            cells = [row[cell.column] for row in self.cells]
+            cells = self.columns[cell.column]
         # Square
         elif dimension in ("square", "sq"):
-            start_row = (int(cell.row / 3) * 3)
-            start_col = (int(cell.column / 3) * 3)
-            # Grab the three rows that we want
-            rows = self.cells[start_row : start_row + 3]
-            # Build the cells array, must be one-dimensional
-            cells = []
-            for row in rows:
-                for entry in row[start_col : start_col + 3]:
-                    cells.append(entry) 
+            cells = self.squares[cell.square]
 
         # Invalid dimension argument handling
         else:
@@ -106,32 +117,31 @@ class Board():
         while change_made:
             change_made = False
             for cell in self.all_cells:
+                # Run the unique method and update change_made if True
                 change_made = cell.unique(self) or change_made
         return
 
     def check(self):
         """Checks if the puzzle is solved correctly and prints out the 
         conclusion."""
-        def check_dimen(list):
-            for value in range(1, len(list)+1):
-                if value not in list:
+        def check_dimen(dimen):
+            for value in range(1, len(dimen)+1):
+                if value not in dimen:
+                    print("Error. Board not solved.")
                     return False
             return True
-        # Rows
-        for row in self.cells:
-            if not check_dimen(row):
-                return False
-        # Columns
-        for col in [row[col] for row in self.cells]:
-            if not check_dimen(col):
-                return False
-        # Squares
-        for sq in [self.get("sq", Cell(row, col) for row in 
+        # For each dimension, check all the row/col/sq in that dimen
+        for dimen_type in (self.rows, self.columns, self.squares):
+            for dimen in dimen_type:
+                if not check_dimen([x.value for x in dimen]):
+                    return False
+        print("Board checked, no errors!")
+        return True
 
 
 class Cell():
     """Contains info about each cell"""
-    def __init__(self, row, column):
+    def __init__(self, row, column, square):
         # Possible values the cell could be
         self.possibilities = list(range(1, 10))
         # Solved value for cell. None if cell not solved. 
@@ -140,6 +150,8 @@ class Cell():
         self.row = row
         # Column that the cell is in
         self.column = column
+        # Square that the cell is in
+        self.square = square
 
     def unique(self, board):
         """First calls self.eliminate because this technique requires that
