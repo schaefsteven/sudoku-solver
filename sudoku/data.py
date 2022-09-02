@@ -15,8 +15,20 @@ class Board():
         # self.cells[row][column]
         self.cells = [[Cell(row, column) for column in range(9)] 
                 for row in range(9)]
+
         # Creates an easy way to iterate over all of the cells at once
         self.all_cells = list(itertools.chain.from_iterable(self.cells))
+
+        # Creates sets of the cells by dimension
+        # Rows (redundant, but makes code more readable)
+        self.rows = self.cells
+        # Columns
+        self.columns = [[row[col] for row in self.cells] 
+                for col in len(self.cells[0])]
+        # Squares
+        
+        self.squares 
+
         # Set values of cells to values from file if one is provided
         if file:
             with open(file) as csvfile:
@@ -96,6 +108,26 @@ class Board():
             for cell in self.all_cells:
                 change_made = cell.unique(self) or change_made
         return
+
+    def check(self):
+        """Checks if the puzzle is solved correctly and prints out the 
+        conclusion."""
+        def check_dimen(list):
+            for value in range(1, len(list)+1):
+                if value not in list:
+                    return False
+            return True
+        # Rows
+        for row in self.cells:
+            if not check_dimen(row):
+                return False
+        # Columns
+        for col in [row[col] for row in self.cells]:
+            if not check_dimen(col):
+                return False
+        # Squares
+        for sq in [self.get("sq", Cell(row, col) for row in 
+
 
 class Cell():
     """Contains info about each cell"""
