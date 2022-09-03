@@ -5,6 +5,8 @@ manipulate its data.
 import csv
 import itertools
 
+DIMENSIONS = ("row", "column", "square")
+
 class Board():
     """Holds all of the cell objects.
 
@@ -112,13 +114,16 @@ class Board():
         return values
     
     def solve(self):
-        """Solves the puzzle"""
+        """Solves the puzzle. The order of the method calls matters! Certain
+        solving methods rely on the previous ones in order to be accurate."""
         change_made = True
         while change_made:
             change_made = False
             for cell in self.all_cells:
-                # Run the unique method and update change_made if True
+                change_made = cell.eliminate(self) or change_made
                 change_made = cell.unique(self) or change_made
+            for cell in self.all_cells:
+                change_made = cell.subset(self) or change_made
         return
 
     def check(self):
@@ -153,15 +158,28 @@ class Cell():
         # Square that the cell is in
         self.square = square
 
+    def eliminate(self, board):
+        """Removes values from self.possibilites if those values are known
+        in any dimension. Returns True if any changes were made to the cell."""
+        change_made = False
+        for dimen in DIMENSIONS:
+            neighbor_values = board.get(dimen, self, "value")
+            for n_val in neighbor_values:
+                if n_val in self.possibilities:
+                    self.possibilities.remove(n_val)
+                    change_made = True
+                    self.check_if_solved()
+        return change_made
+
     def unique(self, board):
-        """First calls self.eliminate because this technique requires that
-        the cell's possibilities list is up to date with known neighor values.
-        Then checks if there is a possibility that is unique in any of the 
-        cell's dimension. If so, set the value to that possibility and clear
+        """Checks if there is a possibility that is unique in any of the 
+        cell's dimensions. If so, set the value to that possibility and clear
         the possibilities list. Returns True if any changes were made to the 
-        cell."""
-        change_made = self.eliminate(board)
-        for dimen in ("row", "col", "sq"):
+        cell. Must be run after self.eliminate because this technique requires 
+        that the cell's possibilities list is up to date with known neighor 
+        values."""
+        change_made = False
+        for dimen in DIMENSIONS:
             neighbor_possibilities = board.get(dimen, self, "possibilities",
                     exclude_self = True)
             for poss in self.possibilities:
@@ -171,17 +189,28 @@ class Cell():
                     change_made = True
         return change_made
 
-    def eliminate(self, board):
-        """Removes values from self.possibilites if those values are known
-        in any dimension. Returns True if any changes were made to the cell."""
+    def subset(self, board):
+        """Checks if there are cells that have identical possibility lists. If
+        the number of cells that share identical poss lists is the same as the 
+        number of possibilities in those lists, then those possibilities can be 
+        removed from all other cells in the dimension."""
+        print("called subset")
         change_made = False
-        for dimen in ("row", "col", "sq"):
-            neighbor_values = board.get(dimen, self, "value")
-            for n_val in neighbor_values:
-                if n_val in self.possibilities:
-                    self.possibilities.remove(n_val)
-                    change_made = True
-                    self.check_if_solved()
+        for dimen in DIMENSIONS:
+            matching_neighbors = 1
+            for neighbor in board.get(dimen, self):
+                if neighbor.possibilities == self.possibilities:
+                    matching_neighbors += 1
+            if matching_neighbors == len(self.possibilities):
+                print("Subset: {}".format(self))
+                change_made = True
+                for neighbor in board.get(dimen, self):
+                    # Check if this cell is one of the matching neighbors.
+                    if neighbor.possibilities != self.possibilities:
+                        for poss in self.possibilities:
+                            if poss in neighbor.possibilities:
+                                print("removed {} from {}".format(poss, neighbor))
+                                neighbor.possibilities.remove(poss)
         return change_made
 
     def check_if_solved(self):
