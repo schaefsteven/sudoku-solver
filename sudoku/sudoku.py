@@ -198,7 +198,8 @@ class Cell():
         """Checks if there are cells that have identical possibility lists. If
         the number of cells that share identical poss lists is the same as the 
         number of possibilities in those lists, then those possibilities can be 
-        removed from all other cells in the dimension."""
+        removed from all other cells in the dimension. Must be run after 
+        self.eliminate"""
         change_made = False
         # Do this in each dimension
         for dimen in DIMENSIONS:
@@ -211,7 +212,6 @@ class Cell():
                     matching_neighbors += 1
             # Check if the matching neighbors matches the number of possibilities
             if matching_neighbors == len(self.possibilities):
-                change_made = True
                 # Loop through the neighbors
                 for neighbor in board.get(dimen, self, exclude_self = True):
                     # Check if this cell is one of the matching neighbors.
@@ -220,6 +220,7 @@ class Cell():
                         # in this dimension
                         for poss in self.possibilities:
                             if poss in neighbor.possibilities:
+                                change_made = True
                                 neighbor.possibilities.remove(poss)
         return change_made
 
