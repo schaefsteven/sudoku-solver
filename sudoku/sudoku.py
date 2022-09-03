@@ -122,7 +122,6 @@ class Board():
             for cell in self.all_cells:
                 change_made = cell.eliminate(self) or change_made
                 change_made = cell.unique(self) or change_made
-            for cell in self.all_cells:
                 change_made = cell.subset(self) or change_made
         return
 
@@ -162,9 +161,12 @@ class Cell():
         """Removes values from self.possibilites if those values are known
         in any dimension. Returns True if any changes were made to the cell."""
         change_made = False
+        # Do this in each dimension
         for dimen in DIMENSIONS:
+            # Grab the list of known values in neighbor cells
             neighbor_values = board.get(dimen, self, "value")
             for n_val in neighbor_values:
+                # Eliminate those values from self.poss
                 if n_val in self.possibilities:
                     self.possibilities.remove(n_val)
                     change_made = True
@@ -179,9 +181,12 @@ class Cell():
         that the cell's possibilities list is up to date with known neighor 
         values."""
         change_made = False
+        # Do this in each dimension
         for dimen in DIMENSIONS:
+            # Grab the list of possibilities for all other cells in dimension
             neighbor_possibilities = board.get(dimen, self, "possibilities",
                     exclude_self = True)
+            # Check for a unique value in self.poss
             for poss in self.possibilities:
                 if poss not in neighbor_possibilities:
                     self.value = poss
@@ -194,22 +199,27 @@ class Cell():
         the number of cells that share identical poss lists is the same as the 
         number of possibilities in those lists, then those possibilities can be 
         removed from all other cells in the dimension."""
-        print("called subset")
         change_made = False
+        # Do this in each dimension
         for dimen in DIMENSIONS:
+            # Keep track of matching neighbors, starts at one to count self. 
             matching_neighbors = 1
-            for neighbor in board.get(dimen, self):
+            # Loop through neighbors, excluding self.
+            for neighbor in board.get(dimen, self, exclude_self = True):
+                # Check if the poss lists match
                 if neighbor.possibilities == self.possibilities:
                     matching_neighbors += 1
+            # Check if the matching neighbors matches the number of possibilities
             if matching_neighbors == len(self.possibilities):
-                print("Subset: {}".format(self))
                 change_made = True
-                for neighbor in board.get(dimen, self):
+                # Loop through the neighbors
+                for neighbor in board.get(dimen, self, exclude_self = True):
                     # Check if this cell is one of the matching neighbors.
                     if neighbor.possibilities != self.possibilities:
+                        # Remove self.poss values from all other poss lists
+                        # in this dimension
                         for poss in self.possibilities:
                             if poss in neighbor.possibilities:
-                                print("removed {} from {}".format(poss, neighbor))
                                 neighbor.possibilities.remove(poss)
         return change_made
 
