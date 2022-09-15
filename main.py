@@ -3,6 +3,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.widget import Widget 
 from kivy.uix.textinput import TextInput
+from kivy.uix.label import Label
 from kivy.properties import StringProperty
 
 from sudoku import sudoku
@@ -28,30 +29,23 @@ class CellGrid(GridLayout):
         super().__init__(**kwargs)
         self.board = sudoku.Board("sample_boards/board0.csv")
         for cell in self.board.all_cells:
-            if cell.value:
-                text = StringProperty(str(cell.value))
-                readonly = True
-            else: 
-                text = StringProperty('')
-                readonly = False
-            text_box = TextInput(text = text, 
-                                 input_filter = 'int',
-                                 readonly = readonly,
-                                 halign = 'center',
-                                 font_size = 30,
-                                 )
-            self.add_widget(text_box)
+            self.add_widget(CellBox(cell))
+        self.update()
 
     def update(self):
-        for text_box, cell in self.children, self.board.all_cells:
+        for cell_box, cell in zip(self.children, self.board.all_cells):
             if cell.value:
-                text_box.text = cell.value
+                print(cell.value)
+                cell_box.text = str(cell.value)
 
 class CellBox(TextInput):
+
+    text_property = StringProperty('')
+
     def __init__(self, cell, **kwargs):
         super().__init__(**kwargs)
         self.cell = cell
-        self.value = ''
+        self.text = self.text_property
 
 if __name__ == "__main__": 
     MainApp().run()
