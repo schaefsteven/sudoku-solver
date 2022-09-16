@@ -1,11 +1,14 @@
 <MainLayout>:
 	orientation: 'vertical' 
+	cell_grid: cell_grid
 	CellGrid:
+		id: cell_grid
 	BoxLayout:
 		size_hint_y: .10
 		orientation: 'horizontal'
 		Button:
 			text: 'Solve'
+			on_press: root.cell_grid.on_solve_click()
 		Button: 
 			text: 'Reset'
 

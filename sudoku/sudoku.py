@@ -157,6 +157,10 @@ class Cell():
         # Square that the cell is in
         self.square = square
 
+    def set_value(self,value):
+        self.value = value
+        self.possibilities = []
+
     def eliminate(self, board):
         """Removes values from self.possibilites if those values are known
         in any dimension. Returns True if any changes were made to the cell."""
