@@ -1,3 +1,6 @@
+from kivy.config import Config
+Config.set('graphics', 'width', '600')
+Config.set('graphics', 'height', '660')
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
@@ -32,7 +35,7 @@ class CellGrid(GridLayout):
             self.dividers = []
             Color(0,0,.3,1)
             for i in range(4):
-                self.dividers.append(Line(width = 4))
+                self.dividers.append(Line(width = 4, cap = 'none'))
         # Call _update_dividers whenever CellGrid is resized
         self.bind(size = self._update_dividers)
 
@@ -51,6 +54,7 @@ class CellGrid(GridLayout):
         for i, div in enumerate(self.dividers[2:], 1):
             y = bottom + ((i/3) * inst.height)
             div.points = [left, y, right, y]
+
 
     def update(self):
         """Checks if cell objects have a value, if so, update the text of the 

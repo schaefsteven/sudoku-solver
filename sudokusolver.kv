@@ -3,8 +3,10 @@
 	cell_grid: cell_grid
 	CellGrid:
 		id: cell_grid
+		size_hint_x: None
+		width: self.height
 	BoxLayout:
-		size_hint_y: .10
+		size_hint_y: .1
 		orientation: 'horizontal'
 		Button:
 			text: 'Solve'
@@ -17,7 +19,7 @@
 	cols: 9 
 
 <CellBox>:
-	font_size: 30
+	font_size: self.height * .60
 	halign: 'center'
 	input_filter: 'int'
 	multiline: False
