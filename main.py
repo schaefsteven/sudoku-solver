@@ -69,11 +69,14 @@ class CellGrid(GridLayout):
             cell_box.cell.set_value(value)
             if not value:
                 cell_box.cell.possibilities = [1,2,3,4,5,6,7,8,9]
-        self.board.print()
         self.board.solve()
-        self.board.print()
         self.board.check()
         self.update()
+
+    def on_reset_click(self):
+        for cell in self.children:
+            cell.cell.reset()
+            cell.text = ''
 
     def _sanitize(self, input):
         try:

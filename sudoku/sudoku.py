@@ -161,6 +161,10 @@ class Cell():
         self.value = value
         self.possibilities = []
 
+    def reset(self):
+        self.value = None
+        self.possibilities = list(range(1,10))
+
     def eliminate(self, board):
         """Removes values from self.possibilites if those values are known
         in any dimension. Returns True if any changes were made to the cell."""
