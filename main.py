@@ -68,7 +68,7 @@ class CellGrid(GridLayout):
             value = self._sanitize(cell_box.text)
             cell_box.cell.set_value(value)
             if not value:
-                cell_box.cell.possibilities = [1,2,3,4,5,6,7,8,9]
+                cell_box.cell.reset()
         self.board.solve()
         self.board.check()
         self.update()
