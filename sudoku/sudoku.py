@@ -7,7 +7,6 @@ import itertools
 import copy
 
 DIMENSIONS = ("row", "column", "square")
-POSSIBILITIES = list(range(1,10))
 
 class Board():
     """Holds all of the cell objects.
@@ -125,30 +124,21 @@ class Board():
                 change_made = cell.eliminate(self) or change_made
                 change_made = cell.unique(self) or change_made
                 change_made = cell.subset(self) or change_made
-        # self.brute_force()
+        if not self.check():
+            self.brute_force()
         return
 
     def brute_force(self):
         """If the solving algorithms cannot solve the puzzle, use the remaining
         possibilities to make guesses and check if that solves the puzzle.
-        What we need to do: 
-        find the first cell that doesn't have a value 
-        choose the first poss 
-        mark it as the origin_guess
-        try to solve
-        if it can't solve, it will call this method again 
-        the cell we already guessed on will be skipped because it now has a 
-        value. 
-        if a cell has no value and no possibilities, break 
-        we should never get here, but if all of the cells are filled but the 
-        board is not solved, break. Raise exception? 
-        
-        Maybe instead of looping through the cells, first build a list of tuples 
-        with the possibility and its parent cell. 
-        How best to structure this? Could make an object instead of a tuple. 
-
-        
         """
+        should_continue = False
+        for cell in self.all_cells:
+            if not cell.value and len(cell.possibilities) > 0:
+                should_continue = True
+                break
+        if not should_continue:
+            return
         # Create a copy of the board to make a guess with it without destroying
         # the info we have for the board
         bf_board = copy.deepcopy(self)
@@ -168,14 +158,15 @@ class Board():
                     all_poss.append(PossWrapper(poss, index))
 
         # Main loop of this method
-        for poss_wrapper in all_poss:
+        print(len(all_poss))
+        for i, poss_wrapper in enumerate(all_poss):
             # Set the cell to the current possibility
-            bf_board.all_cells[poss_wrapper.cell_index] = poss_wrapper.poss
+            bf_board.all_cells[poss_wrapper.cell_index].set_value(poss_wrapper.poss)
             # Try to solve the board (may recursively call this method)
             bf_board.solve()
             # If the board is now solved, set values in self to the solutions
             if bf_board.check():
-                print("Brute force worked")
+                print("found solution")
                 for cell, bf_cell in zip(self.all_cells, bf_board.all_cells):
                     cell.set_value(bf_cell.value)
                 return 
@@ -184,7 +175,6 @@ class Board():
             else:
                 bf_board = copy.deepcopy(self)
 
-        print("Brute force didn't work.")
 
 
     def check(self):
@@ -193,7 +183,7 @@ class Board():
         def check_dimen(dimen):
             for value in range(1, len(dimen)+1):
                 if value not in dimen:
-                    print("Error. Board not solved.")
+                    # print("Error. Board not solved.")
                     return False
             return True
         # For each dimension, check all the row/col/sq in that dimen
@@ -209,7 +199,7 @@ class Cell():
     """Contains info about each cell"""
     def __init__(self, row, column, square):
         # Possible values the cell could be
-        self.possibilities = POSSIBILITIES
+        self.possibilities = list(range(1, 10))
         # Solved value for cell. None if cell not solved. 
         self.value = None
         # Row that the cell is in
@@ -225,7 +215,7 @@ class Cell():
 
     def reset(self):
         self.value = None
-        self.possibilities = POSSIBILITIES
+        self.possibilities = list(range(1, 10))
 
     def eliminate(self, board):
         """Removes values from self.possibilites if those values are known
