@@ -27,7 +27,7 @@ class CellGrid(GridLayout):
     def __init__(self,  **kwargs):
         super().__init__(**kwargs)
         # Create the board object
-        self.board = sudoku.Board()
+        self.board = sudoku.Board("sample_boards/board3.csv")
         # Create all of the CellBox objects, one for each cell in self.board
         for cell in self.board.all_cells:
             self.add_widget(CellBoxWrapper(cell))
