@@ -1,44 +1,51 @@
+# Set the default size of the application window
 from kivy.config import Config
 Config.set('graphics', 'width', '600')
 Config.set('graphics', 'height', '660')
+
 from kivy.app import App
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.relativelayout import RelativeLayout
-from kivy.uix.widget import Widget 
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.properties import StringProperty, ObjectProperty
-from kivy.graphics import Line, Color, Rectangle
+from kivy.graphics import Line, Color
 
 from sudoku import sudoku
 
 
 class SudokuSolverApp(App):
+    """Main application"""
     def build(self):
         return MainLayout()
 
 class MainLayout(BoxLayout):
-    """This is the parent layout of all the gui items"""
-    cell_grid = ObjectProperty(None)
+    """Parent layout of all the gui items"""
+    # This layout is defined in the .kv file. 
+    pass
 
 class CellGrid(GridLayout):
-    """This is the actual sudoku board that is displayed to the user"""
-    def __init__(self,  **kwargs):
+    """Sudoku board that is displayed to the user"""
+    def __init__(self, board=None ,**kwargs):
         super().__init__(**kwargs)
         # Create the board object
-        self.board = sudoku.Board()
+        self.board = sudoku.Board(board)
         # Create all of the CellBox objects, one for each cell in self.board
         for cell in self.board.all_cells:
             self.add_widget(CellBoxWrapper(cell))
+        # If board was passed, we need to update the CellBoxes to show those
+        # values
         self.update(False)
-        # Create 4 divider lines
+
+        # Create 4 divider lines. No points specified because they will be 
+        # updated by self._update_dividers
         with self.canvas.after:
             self.dividers = []
             Color(0,0,.3,1)
             for i in range(4):
                 self.dividers.append(Line(width = 4, cap = 'none'))
-        # Call _update_dividers whenever CellGrid is resized
+        # Call self._update_dividers whenever CellGrid is resized
         self.bind(size = self._update_dividers)
 
     def _update_dividers(self, inst, value):
@@ -56,7 +63,6 @@ class CellGrid(GridLayout):
         for i, div in enumerate(self.dividers[2:], 1):
             y = bottom + ((i/3) * inst.height)
             div.points = [left, y, right, y]
-
 
     def update(self, show_poss = True):
         """Checks if cell objects have a value, if so, update the text of the 
