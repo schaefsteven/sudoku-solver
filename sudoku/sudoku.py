@@ -114,7 +114,7 @@ class Board():
             values = list(itertools.chain.from_iterable(values))
         return values
     
-    def solve(self):
+    def solve(self, level = 0):
         """Solves the puzzle. The order of the method calls matters! Certain
         solving methods rely on the previous ones in order to be accurate."""
         change_made = True
@@ -124,14 +124,18 @@ class Board():
                 change_made = cell.eliminate(self) or change_made
                 change_made = cell.unique(self) or change_made
                 change_made = cell.subset(self) or change_made
+        if self.check():
+            self.print()
         if not self.check():
-            self.brute_force()
+            self.brute_force(level)
         return
 
-    def brute_force(self):
+    def brute_force(self, level):
         """If the solving algorithms cannot solve the puzzle, use the remaining
         possibilities to make guesses and check if that solves the puzzle.
         """
+        level += 1
+        # Check if we should attempt a brute force or not
         should_continue = False
         for cell in self.all_cells:
             if not cell.value and len(cell.possibilities) > 0:
@@ -158,12 +162,12 @@ class Board():
                     all_poss.append(PossWrapper(poss, index))
 
         # Main loop of this method
-        print(len(all_poss))
-        for i, poss_wrapper in enumerate(all_poss):
+        for poss_wrapper in all_poss:
+            print("Level {}, Cell {}, Poss {}".format(level, poss_wrapper.cell_index, poss_wrapper.poss))
             # Set the cell to the current possibility
             bf_board.all_cells[poss_wrapper.cell_index].set_value(poss_wrapper.poss)
             # Try to solve the board (may recursively call this method)
-            bf_board.solve()
+            bf_board.solve(level)
             # If the board is now solved, set values in self to the solutions
             if bf_board.check():
                 print("found solution")
