@@ -156,8 +156,12 @@ class Board():
                 self.cell_index = cell_index
 
         # Populate the all_poss list
+        should_continue = True
         for index, cell in enumerate(bf_board.all_cells):
+            if not should_continue: 
+                break
             if not cell.value:
+                should_continue = False
                 for poss in cell.possibilities:
                     all_poss.append(PossWrapper(poss, index))
 
@@ -187,7 +191,7 @@ class Board():
         def check_dimen(dimen):
             for value in range(1, len(dimen)+1):
                 if value not in dimen:
-                    # print("Error. Board not solved.")
+                    print("Error. Board not solved.")
                     return False
             return True
         # For each dimension, check all the row/col/sq in that dimen
