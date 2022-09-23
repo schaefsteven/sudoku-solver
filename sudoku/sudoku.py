@@ -9,9 +9,8 @@ import copy
 DIMENSIONS = ("row", "column", "square")
 
 class Board():
-    """Holds all of the cell objects.
-
-    If a csv file is passed, it will initialize the board to use those values.
+    """Holds all of the cell objects. If a csv file is passed, it will 
+    initialize the board to use those values.
     """
     def __init__(self, file = None):
         # Two-dimensional array of rows and columns. Indexed as
@@ -114,9 +113,10 @@ class Board():
             values = list(itertools.chain.from_iterable(values))
         return values
     
-    def solve(self, level = 0):
+    def solve(self):
         """Solves the puzzle. The order of the method calls matters! Certain
         solving methods rely on the previous ones in order to be accurate."""
+        # Loop through all cells and run the three solving algos on them.
         change_made = True
         while change_made:
             change_made = False
@@ -125,74 +125,42 @@ class Board():
                 change_made = cell.unique(self) or change_made
                 change_made = cell.subset(self) or change_made
         if self.check():
-            self.print()
-        if not self.check():
-            self.brute_force(level)
-            pass
-        return
+            return
+        else:
+            self.brute_force()
+            return
 
-    def brute_force(self, level):
+    def brute_force(self):
         """If the solving algorithms cannot solve the puzzle, use the remaining
         possibilities to make guesses and check if that solves the puzzle.
         """
-        level += 1
+        self._save_state()
         # Check if we should attempt a brute force or not
-        should_continue = False
+        guess_cell = None
         for cell in self.all_cells:
-            if not cell.value and len(cell.possibilities) > 0:
-                should_continue = True
-                break
-        if not should_continue:
-            return
-        # Create a copy of the board to make a guess with it without destroying
-        # the info we have for the board
-        bf_board = copy.deepcopy(self)
-        all_poss = []
-        
-        class PossWrapper():
-            """simple class to store a possibility value and its cell's index"""
-            def __init__(self, poss, cell_index):
-                self.poss = poss
-                # Index of cell in all_cells list
-                self.cell_index = cell_index
-
-        # Populate the all_poss list
-        should_continue = True
-        for index, cell in enumerate(bf_board.all_cells):
-            if not should_continue: 
-                break
             if not cell.value:
-                should_continue = False
-                for poss in cell.possibilities:
-                    all_poss.append(PossWrapper(poss, index))
+                if not guess_cell:
+                    guess_cell = cell
+                if len(cell.possibilities) <= 0: 
+                    return
+        if not guess_cell:
+            return
 
-        # Main loop of this method
-        for poss_wrapper in all_poss:
-            print("Level {}, Cell {}, Poss {}".format(level, poss_wrapper.cell_index, poss_wrapper.poss))
-            # Set the cell to the current possibility
-            bf_board.all_cells[poss_wrapper.cell_index].set_value(poss_wrapper.poss)
-            # Try to solve the board (may recursively call this method)
-            bf_board.solve(level)
-            # If the board is now solved, set values in self to the solutions
-            if bf_board.check():
-                print("found solution")
-                for cell, bf_cell in zip(self.all_cells, bf_board.all_cells):
-                    cell.set_value(bf_cell.value)
-                return 
-            # If the board is not solved, reset the bf_board to the known values
-            # in the self. 
+        for poss in guess_cell.possibilities:
+            guess_cell.set_value(poss)
+            self.solve()
+            if self.check():
+                return
+            # Else reset the bf_board to try the next possibility. 
             else:
-                bf_board = copy.deepcopy(self)
-
-
+                self._restore_state()
+                self._save_state()
 
     def check(self):
-        """Checks if the puzzle is solved correctly and prints out the 
-        conclusion."""
+        """Checks if the puzzle is solved correctly and returns bool."""
         def check_dimen(dimen):
             for value in range(1, len(dimen)+1):
                 if value not in dimen:
-                    print("Error. Board not solved.")
                     return False
             return True
         # For each dimension, check all the row/col/sq in that dimen
@@ -200,8 +168,13 @@ class Board():
             for dimen in dimen_type:
                 if not check_dimen([x.value for x in dimen]):
                     return False
-        print("Board checked, no errors!")
         return True
+
+    def _save_state(self):
+        self.saved_cells = copy.deepcopy(self.all_cells)
+
+    def _restore_state(self):
+        self.all_cells = self.saved_cells
 
 
 class Cell():
@@ -211,12 +184,13 @@ class Cell():
         self.possibilities = list(range(1, 10))
         # Solved value for cell. None if cell not solved. 
         self.value = None
-        # Row that the cell is in
+        # Row/column/squaer that the cell is in
         self.row = row
-        # Column that the cell is in
         self.column = column
-        # Square that the cell is in
         self.square = square
+
+    def __repr__(self):
+        return f"Cell R:{self.row} C:{self.column}"
 
     def set_value(self,value):
         self.value = value
@@ -226,6 +200,7 @@ class Cell():
         self.value = None
         self.possibilities = list(range(1, 10))
 
+    # Solving Algorithms: 
     def eliminate(self, board):
         """Removes values from self.possibilites if those values are known
         in any dimension. Returns True if any changes were made to the cell."""
@@ -239,7 +214,7 @@ class Cell():
                 if n_val in self.possibilities:
                     self.possibilities.remove(n_val)
                     change_made = True
-                    self.check_if_solved()
+                    self._check_if_solved()
         return change_made
 
     def unique(self, board):
@@ -293,13 +268,10 @@ class Cell():
                                 neighbor.possibilities.remove(poss)
         return change_made
 
-    def check_if_solved(self):
+    def _check_if_solved(self):
         """Checks if there's only one possibility left and if so, sets the 
         value and possibilities of the cell accordingly"""
         if len(self.possibilities) == 1: 
             self.value = self.possibilities.pop()
         return
-
-    def __repr__(self):
-        return f"Cell R:{self.row} C:{self.column}"
 
