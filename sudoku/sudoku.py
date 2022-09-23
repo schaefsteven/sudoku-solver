@@ -128,6 +128,7 @@ class Board():
             self.print()
         if not self.check():
             self.brute_force(level)
+            pass
         return
 
     def brute_force(self, level):
