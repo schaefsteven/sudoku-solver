@@ -208,7 +208,7 @@ class Board():
 
     def _restore_state(self):
         """Restores a state saved in the _save_state method"""
-        for cell, saved_cell in zip(self.all_cells, self.saved_cells.pop()):
+        for cell, saved_cell in zip(self.all_cells, self.saved_cells[-1]):
             cell.value = saved_cell.value
             cell.possibilities = saved_cell.possibilities
 
