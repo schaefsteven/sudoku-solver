@@ -154,10 +154,10 @@ class Board():
         if not guess_cell:
             return False
         
-        # Create a save state so we can revert to it after each guess
-        self._save_state()
         # Main loop for this method
         for poss in guess_cell.possibilities:
+            # Create a save state so we can revert to it if we guess wrong.
+            self._save_state()
             # Make a guess
             guess_cell.set_value(poss)
             # If board is solved, return True
@@ -168,7 +168,6 @@ class Board():
         # If we reach this, there are no solutions to the current board, so 
         # we go back a step
         else:
-            self._delete_state()
             return False
 
     def check_valid(self):
@@ -208,14 +207,9 @@ class Board():
 
     def _restore_state(self):
         """Restores a state saved in the _save_state method"""
-        for cell, saved_cell in zip(self.all_cells, self.saved_cells[-1]):
+        for cell, saved_cell in zip(self.all_cells, self.saved_cells.pop()):
             cell.value = saved_cell.value
             cell.possibilities = saved_cell.possibilities
-
-    def _delete_state(self):
-        """Deletes a state from the end of the list."""
-        self.saved_cells.pop()
-
 
 class Cell():
     """Contains info about each cell"""
