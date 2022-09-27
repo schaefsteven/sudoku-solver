@@ -131,17 +131,15 @@ class Board():
             return
         else:
             self.brute_force()
-            return
 
     def brute_force(self):
         """If the solving algorithms cannot solve the puzzle, use the remaining
         possibilities to make guesses and check if that solves the puzzle.
         """
+        # Check if we should attempt a brute force or not
         if not self.check_valid():
             return
-
-        self._save_state()
-        # Check if we should attempt a brute force or not
+        
         guess_cell = None
         for cell in self.all_cells:
             if not cell.value:
@@ -151,6 +149,8 @@ class Board():
                     return
         if not guess_cell:
             return
+        
+        self._save_state()
 
         for poss in guess_cell.possibilities:
             self.print()
