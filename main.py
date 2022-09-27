@@ -9,6 +9,8 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
+from kivy.uix.popup import Popup
+from kivy.uix.button import Button
 from kivy.properties import StringProperty, ObjectProperty
 from kivy.graphics import Line, Color
 
@@ -88,8 +90,22 @@ class CellGrid(GridLayout):
             # This accounts for cells out of which the value was deleted by user
             if not value:
                 cell_box.cell.reset()
-        self.board.solve()
+        solved = self.board.solve()
         self._update_grid()
+        if not solved:
+            layout = BoxLayout(orientation = "vertical")
+            layout.add_widget(Label(text = "Could not solve board."))
+            button = Button(text = "Okay",
+                            size_hint = (.3, .5),
+                            pos_hint = {"center_x": .5}
+                            )
+            layout.add_widget(button)
+            popup = Popup(title = "Error", 
+                          content = layout,
+                          size_hint = (.5, .3),
+                          )
+            button.bind(on_press = popup.dismiss)
+            popup.open()
 
     def on_reset_click(self):
         """Clears all of the values from the display and resets the board 
@@ -137,7 +153,8 @@ class CellBox(RelativeLayout):
                               valign = 'middle',
                               padding = [15, 15]
                               ))
-        self.add_widget(self.poss_disp)
+        # This line is commented out to disable the poss_disp overlay.
+        # self.add_widget(self.poss_disp)
 
     # Point references to cell and text into the TextInput child object
     @property

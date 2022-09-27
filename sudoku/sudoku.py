@@ -81,7 +81,6 @@ class Board():
                 column_count += 1
             row_count += 1 
             print("")
-        print("\n\n")
 
     def get(self, dimension, cell, attr="", exclude_self = False):
         """Returns information about the cells in the Board object
@@ -118,7 +117,9 @@ class Board():
     
     def solve(self):
         """Solves the puzzle. The order of the method calls matters! Certain
-        solving methods rely on the previous ones in order to be accurate."""
+        solving methods rely on the previous ones in order to be accurate.
+        Returns bool indicating whether it was successful.
+        """
         # Loop through all cells and run the three solving algos on them.
         change_made = True
         while change_made:
@@ -127,47 +128,47 @@ class Board():
                 change_made = cell.eliminate(self) or change_made
                 change_made = cell.unique(self) or change_made
                 change_made = cell.subset(self) or change_made
-        if not self.check():
-            print("calling brute_force")
-            self.brute_force()
+        if self.check():
+            return True
+        else:
+            return self.brute_force()
 
     def brute_force(self):
         """If the solving algorithms cannot solve the puzzle, use the remaining
         possibilities to make guesses and check if that solves the puzzle.
+        Returns bool indicating whether it was successful.
         """
-        # Check if we should attempt a brute force or not
+        # If the board is already invalid, return False
         if not self.check_valid():
-            print("returning at top because board is not valid")
-            return
-        
+            return False
         guess_cell = None
         for cell in self.all_cells:
             if not cell.value:
+                # This statement finds the first cell with no value
                 if not guess_cell:
                     guess_cell = cell
+                # If there are any empty cells with no poss, return False
                 if len(cell.possibilities) <= 0: 
-                    print("returning because cell has no value or possibles")
-                    return
+                    return False
+        # If there are no empty cells, return False
         if not guess_cell:
-            print("returning because there are no empty cells")
-            return
+            return False
         
+        # Create a save state so we can revert to it after each guess
         self._save_state()
-
+        # Main loop for this method
         for poss in guess_cell.possibilities:
-            self.print()
-            print("making guess on above board")
+            # Make a guess
             guess_cell.set_value(poss)
-            self.solve()
-            if self.check():
-                print("returning because solved.")
-                break
-            else:
-                self._restore_state()
-                self._save_state()
-        else:
-            print("no solutions for this cell")
+            # If board is solved, return True
+            if self.solve():
+                return True
+            # If not, restore state of the board before we guessed. 
             self._restore_state()
+        # If we reach this, there are no solutions to the current board, so 
+        # we go back a step
+        else:
+            return False
 
     def check_valid(self):
         """Checks if any rules are broken and returns bool."""
@@ -178,6 +179,7 @@ class Board():
                         return False
             return True
 
+        # For each dimension, check all the row/col/sq in that dimen
         for dimen_type in (self.rows, self.columns, self.squares):
             for dimen in dimen_type:
                 if not check_dimen([x.value for x in dimen]):
@@ -191,6 +193,7 @@ class Board():
                 if value not in dimen:
                     return False
             return True
+
         # For each dimension, check all the row/col/sq in that dimen
         for dimen_type in (self.rows, self.columns, self.squares):
             for dimen in dimen_type:
@@ -199,11 +202,14 @@ class Board():
         return True
 
     def _save_state(self):
+        """Saves a list of the cells as they are so it can be recalled later"""
         self.saved_cells.append(copy.deepcopy(self.all_cells))
-        print(len(self.saved_cells))
 
     def _restore_state(self):
-        self.all_cells = self.saved_cells.pop()
+        """Restores a state saved in the _save_state method"""
+        for cell, saved_cell in zip(self.all_cells, self.saved_cells.pop()):
+            cell.value = saved_cell.value
+            cell.possibilities = saved_cell.possibilities
 
 
 class Cell():
@@ -243,7 +249,7 @@ class Cell():
                 if n_val in self.possibilities:
                     self.possibilities.remove(n_val)
                     change_made = True
-                    self._check_if_solved()
+        self._check_if_solved()
         return change_made
 
     def unique(self, board):
