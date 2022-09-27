@@ -59,6 +59,9 @@ class Board():
                         cell.value = int(read_cell)
                         cell.possibilities = []
 
+        # Initialize the saved_cells array
+        self.saved_cells = []
+
     def print(self):
         """Prints out the values of the board to command line."""
         row_count = 0
@@ -134,6 +137,9 @@ class Board():
         """If the solving algorithms cannot solve the puzzle, use the remaining
         possibilities to make guesses and check if that solves the puzzle.
         """
+        if not self.check_valid():
+            return
+
         self._save_state()
         # Check if we should attempt a brute force or not
         guess_cell = None
@@ -147,14 +153,29 @@ class Board():
             return
 
         for poss in guess_cell.possibilities:
+            self.print()
             guess_cell.set_value(poss)
             self.solve()
-            if self.check():
+            if self.check_valid():
                 return
-            # Else reset the bf_board to try the next possibility. 
             else:
                 self._restore_state()
                 self._save_state()
+
+    def check_valid(self):
+        """Checks if any rules are broken and returns bool."""
+        def check_dimen(dimen):
+            for value in dimen:
+                if value:
+                    if dimen.count(value) > 1:
+                        return False
+            return True
+
+        for dimen_type in (self.rows, self.columns, self.squares):
+            for dimen in dimen_type:
+                if not check_dimen([x.value for x in dimen]):
+                    return False
+        return True
 
     def check(self):
         """Checks if the puzzle is solved correctly and returns bool."""
@@ -171,10 +192,10 @@ class Board():
         return True
 
     def _save_state(self):
-        self.saved_cells = copy.deepcopy(self.all_cells)
+        self.saved_cells.append(copy.deepcopy(self.all_cells))
 
     def _restore_state(self):
-        self.all_cells = self.saved_cells
+        self.all_cells = self.saved_cells.pop()
 
 
 class Cell():
@@ -184,7 +205,7 @@ class Cell():
         self.possibilities = list(range(1, 10))
         # Solved value for cell. None if cell not solved. 
         self.value = None
-        # Row/column/squaer that the cell is in
+        # Row/column/square that the cell is in
         self.row = row
         self.column = column
         self.square = square
