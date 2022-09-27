@@ -127,9 +127,8 @@ class Board():
                 change_made = cell.eliminate(self) or change_made
                 change_made = cell.unique(self) or change_made
                 change_made = cell.subset(self) or change_made
-        if self.check():
-            return
-        else:
+        if not self.check():
+            print("calling brute_force")
             self.brute_force()
 
     def brute_force(self):
@@ -138,6 +137,7 @@ class Board():
         """
         # Check if we should attempt a brute force or not
         if not self.check_valid():
+            print("returning at top because board is not valid")
             return
         
         guess_cell = None
@@ -146,21 +146,28 @@ class Board():
                 if not guess_cell:
                     guess_cell = cell
                 if len(cell.possibilities) <= 0: 
+                    print("returning because cell has no value or possibles")
                     return
         if not guess_cell:
+            print("returning because there are no empty cells")
             return
         
         self._save_state()
 
         for poss in guess_cell.possibilities:
             self.print()
+            print("making guess on above board")
             guess_cell.set_value(poss)
             self.solve()
-            if self.check_valid():
-                return
+            if self.check():
+                print("returning because solved.")
+                break
             else:
                 self._restore_state()
                 self._save_state()
+        else:
+            print("no solutions for this cell")
+            self._restore_state()
 
     def check_valid(self):
         """Checks if any rules are broken and returns bool."""
@@ -193,6 +200,7 @@ class Board():
 
     def _save_state(self):
         self.saved_cells.append(copy.deepcopy(self.all_cells))
+        print(len(self.saved_cells))
 
     def _restore_state(self):
         self.all_cells = self.saved_cells.pop()
