@@ -4,13 +4,13 @@ manipulate its data.
 
 import csv
 import itertools
+import copy
 
 DIMENSIONS = ("row", "column", "square")
 
 class Board():
-    """Holds all of the cell objects.
-
-    If a csv file is passed, it will initialize the board to use those values.
+    """Holds all of the cell objects. If a csv file is passed, it will 
+    initialize the board to use those values.
     """
     def __init__(self, file = None):
         # Two-dimensional array of rows and columns. Indexed as
@@ -59,6 +59,9 @@ class Board():
                         cell.value = int(read_cell)
                         cell.possibilities = []
 
+        # Initialize the saved_cells array
+        self.saved_cells = []
+
     def print(self):
         """Prints out the values of the board to command line."""
         row_count = 0
@@ -78,7 +81,6 @@ class Board():
                 column_count += 1
             row_count += 1 
             print("")
-        print("\n\n")
 
     def get(self, dimension, cell, attr="", exclude_self = False):
         """Returns information about the cells in the Board object
@@ -115,7 +117,10 @@ class Board():
     
     def solve(self):
         """Solves the puzzle. The order of the method calls matters! Certain
-        solving methods rely on the previous ones in order to be accurate."""
+        solving methods rely on the previous ones in order to be accurate.
+        Returns bool indicating whether it was successful.
+        """
+        # Loop through all cells and run the three solving algos on them.
         change_made = True
         while change_made:
             change_made = False
@@ -123,24 +128,93 @@ class Board():
                 change_made = cell.eliminate(self) or change_made
                 change_made = cell.unique(self) or change_made
                 change_made = cell.subset(self) or change_made
-        return
-
-    def check(self):
-        """Checks if the puzzle is solved correctly and prints out the 
-        conclusion."""
-        def check_dimen(dimen):
-            for value in range(1, len(dimen)+1):
-                if value not in dimen:
-                    print("Error. Board not solved.")
-                    return False
+        if self.check():
             return True
+        else:
+            return self.brute_force()
+
+    def brute_force(self):
+        """If the solving algorithms cannot solve the puzzle, use the remaining
+        possibilities to make guesses and check if that solves the puzzle.
+        Returns bool indicating whether it was successful.
+        """
+        # If the board is already invalid, return False
+        if not self.check_valid():
+            return False
+        guess_cell = None
+        for cell in self.all_cells:
+            if not cell.value:
+                # This statement finds the first cell with no value
+                if not guess_cell:
+                    guess_cell = cell
+                # If there are any empty cells with no poss, return False
+                if len(cell.possibilities) <= 0: 
+                    return False
+        # If there are no empty cells, return False
+        if not guess_cell:
+            return False
+        
+        # Create a save state so we can revert to it after each guess
+        self._save_state()
+        # Main loop for this method
+        for poss in guess_cell.possibilities:
+            # Make a guess
+            guess_cell.set_value(poss)
+            # If board is solved, return True
+            if self.solve():
+                return True
+            # If not, restore state of the board before we guessed. 
+            self._restore_state()
+        # If we reach this, there are no solutions to the current board, so 
+        # we go back a step
+        else:
+            self._delete_state()
+            return False
+
+    def check_valid(self):
+        """Checks if any rules are broken and returns bool."""
+        def check_dimen(dimen):
+            for value in dimen:
+                if value:
+                    if dimen.count(value) > 1:
+                        return False
+            return True
+
         # For each dimension, check all the row/col/sq in that dimen
         for dimen_type in (self.rows, self.columns, self.squares):
             for dimen in dimen_type:
                 if not check_dimen([x.value for x in dimen]):
                     return False
-        print("Board checked, no errors!")
         return True
+
+    def check(self):
+        """Checks if the puzzle is solved correctly and returns bool."""
+        def check_dimen(dimen):
+            for value in range(1, len(dimen)+1):
+                if value not in dimen:
+                    return False
+            return True
+
+        # For each dimension, check all the row/col/sq in that dimen
+        for dimen_type in (self.rows, self.columns, self.squares):
+            for dimen in dimen_type:
+                if not check_dimen([x.value for x in dimen]):
+                    return False
+        return True
+
+    def _save_state(self):
+        """Saves a list of the cells as they are so it can be recalled later"""
+        self.saved_cells.append(copy.deepcopy(self.all_cells))
+
+    def _restore_state(self):
+        """Restores a state saved in the _save_state method"""
+        for cell, saved_cell in zip(self.all_cells, self.saved_cells.pop()):
+            cell.value = saved_cell.value
+            cell.possibilities = saved_cell.possibilities
+
+    def _delete_state(self):
+        """Deletes a state from the end of the list."""
+        self.saved_cells.pop()
 
 
 class Cell():
@@ -150,12 +224,13 @@ class Cell():
         self.possibilities = list(range(1, 10))
         # Solved value for cell. None if cell not solved. 
         self.value = None
-        # Row that the cell is in
+        # Row/column/square that the cell is in
         self.row = row
-        # Column that the cell is in
         self.column = column
-        # Square that the cell is in
         self.square = square
+
+    def __repr__(self):
+        return f"Cell R:{self.row} C:{self.column}"
 
     def set_value(self,value):
         self.value = value
@@ -163,8 +238,9 @@ class Cell():
 
     def reset(self):
         self.value = None
-        self.possibilities = list(range(1,10))
+        self.possibilities = list(range(1, 10))
 
+    # Solving Algorithms: 
     def eliminate(self, board):
         """Removes values from self.possibilites if those values are known
         in any dimension. Returns True if any changes were made to the cell."""
@@ -178,7 +254,7 @@ class Cell():
                 if n_val in self.possibilities:
                     self.possibilities.remove(n_val)
                     change_made = True
-                    self.check_if_solved()
+        self._check_if_solved()
         return change_made
 
     def unique(self, board):
@@ -232,13 +308,10 @@ class Cell():
                                 neighbor.possibilities.remove(poss)
         return change_made
 
-    def check_if_solved(self):
+    def _check_if_solved(self):
         """Checks if there's only one possibility left and if so, sets the 
         value and possibilities of the cell accordingly"""
         if len(self.possibilities) == 1: 
             self.value = self.possibilities.pop()
         return
-
-    def __repr__(self):
-        return f"Cell R:{self.row} C:{self.column}"
 

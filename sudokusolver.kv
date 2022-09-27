@@ -12,14 +12,14 @@
 			text: 'Solve'
 			on_press: root.cell_grid.on_solve_click()
 		Button: 
-			text: 'Reset'
+			text: 'Clear'
 			on_press: root.cell_grid.on_reset_click()
 
 <CellGrid>:
 	rows: 9
 	cols: 9 
 
-<CellBox>:
+<CellBoxText>:
 	font_size: self.height * .60
 	halign: 'center'
 	input_filter: 'int'
