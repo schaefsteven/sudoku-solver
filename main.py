@@ -25,6 +25,7 @@ class SudokuSolverApp(App):
 class MainLayout(BoxLayout):
     """Parent layout of all the gui items"""
     # This layout is defined in the .kv file. 
+    pass
 
 class CellGrid(GridLayout):
     """Sudoku board that is displayed to the user"""
@@ -105,9 +106,9 @@ class CellGrid(GridLayout):
         object 
         """
         for cell in self.children:
+            # Reset the actual cell object
             cell.cell.reset()
-            cell.text = ''
-            cell.poss_disp.text = ''
+        self._update_grid(False)
 
     def _sanitize(self, input):
         """Sanitizes user input from the sudoku board grid"""
