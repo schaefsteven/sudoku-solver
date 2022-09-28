@@ -11,7 +11,7 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.label import Label
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
-from kivy.properties import StringProperty, ObjectProperty
+from kivy.properties import StringProperty
 from kivy.graphics import Line, Color
 
 from sudoku import sudoku
@@ -25,14 +25,13 @@ class SudokuSolverApp(App):
 class MainLayout(BoxLayout):
     """Parent layout of all the gui items"""
     # This layout is defined in the .kv file. 
-    pass
 
 class CellGrid(GridLayout):
     """Sudoku board that is displayed to the user"""
     def __init__(self, board=None ,**kwargs):
         super().__init__(**kwargs)
         # Create the board object
-        self.board = sudoku.Board()
+        self.board = sudoku.Board(board)
         # Create all of the CellBox objects, one for each cell in self.board
         for cell in self.board.all_cells:
             self.add_widget(CellBox(cell))
@@ -46,24 +45,26 @@ class CellGrid(GridLayout):
             Color(0,0,0,1)
             for i in range(4):
                 self.dividers.append(Line(width = 4, cap = 'none'))
-        # Call self._update_dividers whenever CellGrid is resized
+        # Call self._update_dividers whenever CellGrid is resized or moved
         self.bind(size = self._update_dividers)
+        self.bind(x = self._update_dividers)
+        self.bind(y = self._update_dividers)
 
     def _update_dividers(self, inst, value):
-        """Called whenever CellGrid is resized, defines points of the divider 
-        lines
+        """Called whenever CellGrid is resized or moved, defines points of the 
+        divider lines
         """
-        top = inst.y + inst.height
-        bottom = inst.y
-        right = inst.x + inst.width
-        left = inst.x
+        top = self.y + self.height
+        bottom = self.y
+        right = self.x + self.width
+        left = self.x
         # Vertical lines
         for i, div in enumerate(self.dividers[:2], 1):
-            x = left + ((i/3) * inst.width)
+            x = left + ((i/3) * self.width)
             div.points = [x, top, x, bottom]
         # Horizontal lines
         for i, div in enumerate(self.dividers[2:], 1):
-            y = bottom + ((i/3) * inst.height)
+            y = bottom + ((i/3) * self.height)
             div.points = [left, y, right, y]
 
     def _update_grid(self, show_poss = True):

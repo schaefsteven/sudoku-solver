@@ -63,7 +63,9 @@ class Board():
         self.saved_cells = []
 
     def print(self):
-        """Prints out the values of the board to command line."""
+        """Prints out the values of the board to command line. Used for 
+        debugging.
+        """
         row_count = 0
         column_count = 0
         for row in self.cells:
