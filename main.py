@@ -75,6 +75,7 @@ class CellGrid(GridLayout):
             if cell_box.cell.value:
                 cell_box.text = str(cell_box.cell.value)
                 cell_box.poss_disp.text = ''
+            # If cell doesn't have a value, clear its display
             else:
                 cell_box.text = ''
                 if show_poss:
@@ -90,21 +91,12 @@ class CellGrid(GridLayout):
             # This accounts for cells out of which the value was deleted by user
             if not value:
                 cell_box.cell.reset()
+        # Solve the board and store there success state
         solved = self.board.solve()
         self._update_grid()
+        # If the board wasn't solved, show the error popup
         if not solved:
-            layout = BoxLayout(orientation = "vertical")
-            layout.add_widget(Label(text = "Could not solve board."))
-            button = Button(text = "Okay",
-                            size_hint = (.3, .5),
-                            pos_hint = {"center_x": .5}
-                            )
-            layout.add_widget(button)
-            popup = Popup(title = "Error", 
-                          content = layout,
-                          size_hint = (.5, .3),
-                          )
-            button.bind(on_press = popup.dismiss)
+            popup = ErrorPopup()
             popup.open()
 
     def on_reset_click(self):
@@ -179,6 +171,10 @@ class CellBoxText(TextInput):
         super().__init__(**kwargs)
         self.cell = cell
         self.text = self.text_property
+
+class ErrorPopup(Popup):
+    # This popup is defined in the .kv file. 
+    pass
 
 
 if __name__ == "__main__": 

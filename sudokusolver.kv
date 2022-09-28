@@ -1,12 +1,17 @@
 <MainLayout>:
 	orientation: 'vertical' 
 	cell_grid: cell_grid
-	CellGrid:
-		id: cell_grid
-		size_hint_x: None
-		width: self.height
+	FloatLayout:
+		id: f_layout
+		CellGrid:
+			id: cell_grid
+			size_hint: None, None
+			height: min(f_layout.height, f_layout.width)
+			width: self.height
+			pos_hint: {"center_x": .5, "center_y": .5}
 	BoxLayout:
-		size_hint_y: .1
+		size_hint_y: None
+		height: root.height * .1
 		orientation: 'horizontal'
 		Button:
 			text: 'Solve'
@@ -25,3 +30,25 @@
 	input_filter: 'int'
 	multiline: False
 	write_tab: False
+
+<ErrorPopup>:
+	title: "Error"
+	size_hint: .5, .3
+	BoxLayout:
+		orientation: "vertical"
+		Label:
+			text: "There are no solutions to this puzzle"
+			text_size: self.size
+			font_size: self.height * .25
+			halign: "center"
+			valign: "center"
+		Button:
+			text: "Okay"
+			text_size: self.size
+			font_size: self.width * .25
+			halign: "center"
+			valign: "center"
+			size_hint: .3, .5
+			pos_hint: {"center_x": .5}
+			on_press: root.dismiss()
+
