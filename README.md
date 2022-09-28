@@ -1,5 +1,5 @@
 # Sudoku Solver
-This is a program that can solve any valid sudoku puzzle. It is written in python using the kivy framework. It has a full GUI for ease of use.
+This is a program that can solve any valid sudoku puzzle. It is written in python using the kivy framework. It has a full GUI for ease of use. \n\n
 The typical sudoku puzzle that you will find in a book or on a website has only one solution and this program will find it. However, it is possible to give the program a starting board that has multiple solutions. In this case, the program will stop at the first solution it finds and display it to you. Finally, it is possible to give the program a puzzle that does not have any solutions. In this case, the program will notify you that no solutions exist and leave the puzzle as you input it. 
 
 ## Methods
