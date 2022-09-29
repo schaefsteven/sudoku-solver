@@ -19,7 +19,13 @@ However, a simple brute-force approach to the problem is inefficient, so we inst
 The backtracking algorithm is able to solve any puzzle on its own without the previous algorithms, but using the above algorithms, we are able to reduce the size of the problem much more quickly, so we use the first three algorithms until they fail, and only then do we start brute-forcing the answer. 
 
 ## Installation
-It is recommended to install with Pipenv. You need to have Python 3.x and Pipenv installed first.
+### For Users
+If you just want to download and use the program, you can download the latest release by [clicking here](https://github.com/schaefsteven/sudoku_solver/releases/download/Sudoku/SudokuSolver.exe).
+
+Important: The first time you download the program, Windows Defender will warn you that the app is unrecognized. Simply click "More info" which will reveal a button labeled "Run Anyway." Click that button and the program will then run. 
+
+### For Developers
+It is recommended to install with Pipenv. You need to have [Python 3.x](https://wiki.python.org/moin/BeginnersGuide/Download) and [Pipenv](https://pypi.org/project/pipenv/) installed first.
 ```
 git clone https://github.com/schaefsteven/sudoku_solver.git
 cd .\sudoku_solver\
@@ -29,6 +35,3 @@ You can then run the program with:
 ```
 pipenv run main.py
 ```
-Instructions for installing Python 3.x: https://wiki.python.org/moin/BeginnersGuide/Download
-
-Instructions for installing Pipenv: https://pypi.org/project/pipenv/
