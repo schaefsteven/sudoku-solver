@@ -1,5 +1,5 @@
-"""This module provides all of the tools to create a sudoku board and 
-manipulate its data. 
+"""This module provides all of the tools to create a sudoku board, manipulate 
+its data, and solve the puzzle.
 """
 
 import csv

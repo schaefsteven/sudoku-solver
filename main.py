@@ -1,3 +1,7 @@
+"""This is the main file of the program. It contains all of the GUI 
+implementation (aside from what is implemented in sudokusolver.kv.)
+"""
+
 # Set the default size of the application window
 from kivy.config import Config
 Config.set('graphics', 'width', '600')

@@ -17,3 +17,17 @@ Most easy and medium difficulty puzzles and many hard difficulty puzzles can be 
 However, a simple brute-force approach to the problem is inefficient, so we instead use a backtracking algorithm that checks at each step to see if the current state of the board is valid, and if not, it stops searching that branch of the tree. 
 
 The backtracking algorithm is able to solve any puzzle on its own without the previous algorithms, but using the above algorithms, we are able to reduce the size of the problem much more quickly, so we use the first three algorithms until they fail, and only then do we start brute-forcing the answer. 
+
+## Installation
+It is recommended to install with Pipenv:
+
+```powershell
+git clone https://github.com/schaefsteven/sudoku_solver.git
+cd .\sudoku_solver\
+pipenv install
+```
+You can then run the program with:
+```powershell
+pipenv run main.py
+```
+
