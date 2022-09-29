@@ -1,6 +1,6 @@
 # Sudoku Solver
 
-This is a program that can solve any valid sudoku puzzle. It is written in python using the kivy framework. It has a full GUI for ease of use.
+This is a program that can solve any valid sudoku puzzle. It is written in Python using the Kivy framework. It has a full GUI for ease of use.
 
 The typical sudoku puzzle that you will find in a book or on a website has only one solution and this program will find it. However, it is possible to give the program a starting board that has multiple solutions. In this case, the program will stop at the first solution it finds and display it to you. Finally, it is possible to give the program a puzzle that does not have any solutions. In this case, the program will notify you that no solutions exist and leave the puzzle as you input it. 
 
@@ -18,7 +18,7 @@ If a possibility occurs only once in any dimension (row, column, or square), the
 
 ### Subsets
 
-Typically refered to by the sudoku community as naked pairs/triplets/etc, if a group of neighbor cells all have the same possibilities and the number of possibilities is the same as the number of members of the group, then we know that those numbers must go into the cells of the group. We can therefore remove those possibilities from the rest of the neighbors not in the group.
+Typically referred to by the sudoku community as naked pairs/triplets/etc, if a group of neighbor cells all have the same possibilities and the number of possibilities is the same as the number of members of the group, then we know that those numbers must go into the cells of the group. We can therefore remove those possibilities from the rest of the neighbors not in the group.
 
 ### Backtracking Brute-Force
 
