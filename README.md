@@ -19,15 +19,16 @@ However, a simple brute-force approach to the problem is inefficient, so we inst
 The backtracking algorithm is able to solve any puzzle on its own without the previous algorithms, but using the above algorithms, we are able to reduce the size of the problem much more quickly, so we use the first three algorithms until they fail, and only then do we start brute-forcing the answer. 
 
 ## Installation
-It is recommended to install with Pipenv:
-
-```powershell
+It is recommended to install with Pipenv. You need to have Python 3.x and Pipenv installed first.
+```
 git clone https://github.com/schaefsteven/sudoku_solver.git
 cd .\sudoku_solver\
 pipenv install
 ```
 You can then run the program with:
-```powershell
+```
 pipenv run main.py
 ```
+Instructions for installing Python 3.x: https://wiki.python.org/moin/BeginnersGuide/Download
 
+Instructions for installing Pipenv: https://pypi.org/project/pipenv/
