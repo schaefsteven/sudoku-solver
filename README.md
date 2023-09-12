@@ -2,7 +2,18 @@
 
 This is a program that can solve any valid sudoku puzzle. It is written in Python using the Kivy framework. It has a full GUI for ease of use.
 
+Example of a puzzle entered into the app:
+
+![sudoku solver with an unsolved puzzle](./readme-media/before-solve.PNG)
+
+After clicking solve, if the app is able to solve the puzzle, it displays it like this:
+
+![sudoku solver with a solved puzzle](./readme-media/after-solve.PNG)
+
 The typical sudoku puzzle that you will find in a book or on a website has only one solution and this program will find it. However, it is possible to give the program a starting board that has multiple solutions. In this case, the program will stop at the first solution it finds and display it to you. Finally, it is possible to give the program a puzzle that does not have any solutions. In this case, the program will notify you that no solutions exist and leave the puzzle as you input it. 
+
+![sudoku solver showing no-solutions message](./readme-media/no-solutions.PNG)
+
 
 ## Algorithms
 
